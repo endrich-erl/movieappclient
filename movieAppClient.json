@@ -1,5 +1,5 @@
 {
-    "url": "",
+    "url": "https://movieappclient-khaki.vercel.app",
     "endpoints": {
         "register": "/register",
         "login": "/login",
