@@ -12,7 +12,7 @@ const [movies, setMovies] = useState([]);
     }, [moviesData]);
 
     return (
-        <>
+        <>  
             <h2>Movies List</h2>
             {movies.length === 0 ? <p>No movies found</p> : null}
             {movies.map(movie => (

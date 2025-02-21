@@ -19,7 +19,6 @@ export default function AdminView({ moviesData, fetchData }) {
                         <th className="text-light bg-dark">Year</th>
                         <th className="text-light bg-dark">Genre</th>
                         <th className="text-light bg-dark">Description</th>
-                        <th className="text-light bg-dark">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,9 +35,6 @@ export default function AdminView({ moviesData, fetchData }) {
                                 <td>{movie.year}</td>
                                 <td>{movie.genre}</td>
                                 <td>{movie.description.substring(0, 100)}...</td>
-                                <td className={movie.isActive ? "text-success" : "text-danger"}>
-                                    {movie.isActive ? "Available" : "Unavailable"}
-                                </td>
                             </tr>
                         ))
                     )}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { Navigate, Link } from 'react-router-dom';
-import UserContext from '../context/UserContext';
+import { Navigate } from 'react-router-dom';
 import { Notyf } from 'notyf';
+
+import UserContext from '../context/UserContext';
 
 export default function Login() {
     const notyf = new Notyf();
@@ -10,12 +11,12 @@ export default function Login() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [isActive, setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(true);
 
     function authenticate(e) {
         e.preventDefault();
 
-        fetch(`https://movieapp-api-lms1.onrender.com/users/login`, {
+        fetch('https://movieapp-api-lms1.onrender.com/users/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -24,68 +25,75 @@ export default function Login() {
         })
         .then(res => res.json())
         .then(data => {
-            console.log("Full Login Response:", data); // Debugging the full response
+            if (data.access) {
+                console.log("Login successful! Token:", data.access); 
+                console.log("email:", email);
 
-            if (data.access !== undefined) {
+                // Store token & email
                 localStorage.setItem('token', data.access);
-                
-                // Check if isAdmin is in the response
-                if (data.hasOwnProperty('isAdmin')) {
-                    localStorage.setItem('isAdmin', data.isAdmin);
-                    setUser({ id: "user", isAdmin: data.isAdmin });
-                } else {
-                    console.error(" Backend didn't send isAdmin! Check API response~!");
-                }
+                localStorage.setItem('email', email);
 
-                notyf.success('Successful Login!');
+                // Determine admin status based on email
+                const isAdmin = email === "admin@mail.com";
+
+                // Update user state
+                setUser({
+                    id: "placeholder-id", // No user details route, so this is a placeholder
+                    email: email,
+                    isAdmin: isAdmin
+                });
+
+                // Clear inputs
+                setEmail('');
+                setPassword('');
+
+                notyf.success('Successful Login');
             } else {
-                notyf.error('Incorrect Credentials. Try Again!');
+                notyf.error(data.message || 'Login failed. Try again.');
             }
         })
         .catch(error => {
-            console.error(" Fetch error:", error);
-            notyf.error('Something went wrong!');
+            console.error("Login error:", error);
+            notyf.error('Something went wrong, try again.');
         });
     }
+
     useEffect(() => {
         setIsActive(email !== '' && password !== '');
     }, [email, password]);
 
     return (
-        user.id !== null ? <Navigate to="/" /> : 
-        <Form onSubmit={authenticate}>
-            <h1 className="my-5 text-center">Login</h1>
-            <Form.Group>
-                <Form.Label>Email address</Form.Label>
-                <Form.Control 
-                    type="email" 
-                    placeholder="Enter email" 
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </Form.Group>
+        user.id !== null ? (
+            <Navigate to="/" />
+        ) : (
+            <Form onSubmit={authenticate}>
+                <h1 className="my-5 text-center">Login</h1>
+                <Form.Group>
+                    <Form.Label>Email address</Form.Label>
+                    <Form.Control 
+                        type="email" 
+                        placeholder="Enter email" 
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-                <Form.Label>Password</Form.Label>
-                <Form.Control 
-                    type="password" 
-                    placeholder="Password" 
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control 
+                        type="password" 
+                        placeholder="Password" 
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </Form.Group>
 
-            <div className="d-flex justify-content-center my-5">
-                <Button variant={isActive ? "primary" : "danger"} type="submit" disabled={!isActive}>
+                <Button variant={isActive ? "primary" : "danger"} type="submit" id="loginBtn" disabled={!isActive}>
                     Login
                 </Button>
-            </div>
-
-            <p className="text-center">
-                Don't have an account? You can <Link to="/register">register</Link> here!
-            </p>
-        </Form>
+            </Form>       
+        )
     );
 }
